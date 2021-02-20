@@ -5,7 +5,8 @@ module.exports = {
   entry: './src/index.js',
   output: {
     filename: 'bunder.js',
-    path: resolve(__dirname, 'build')
+    path: resolve(__dirname, 'build'),
+    publicPath: './'
   },
   module: {
     rules: [
@@ -23,6 +24,19 @@ module.exports = {
           'css-loader',
           'sass-loader',
         ]
+      },
+      {
+        test: /\.(jpg|png|gif)$/,
+        loader: 'url-loader',
+        options: {
+          limit: 8 * 1024,
+          esModule: false,
+          name: '[hash:10].[ext]', //哈希前10位，[ext]:源文件后缀名
+        }
+      },
+      {
+        test: /\.html$/,
+        loader: 'html-withimg-loader',  //处理img标签，负责引入图片
       }
     ]
   },
