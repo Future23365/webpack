@@ -37,6 +37,14 @@ module.exports = {
       {
         test: /\.html$/,
         loader: 'html-withimg-loader',  //处理img标签，负责引入图片
+      },
+      {
+        // exclude: /\.(css|js|html)$/, //排除资源
+        test: /\.(eot|ttf|svg|woff|woff2)/,
+        loader: 'file-loader',
+        options: {
+          name: '[hash:10].[ext]'
+        }
       }
     ]
   },
@@ -45,5 +53,13 @@ module.exports = {
       template: './src/index.html'
     })
   ],
-  mode: 'development'
+  mode: 'development',
+  // target: "web",
+  devServer: {
+    contentBase: resolve(__dirname, 'build'),
+    // contentBase: './dist',
+    compress: true, //启动gzip压缩
+    port: 3000,
+    open: true
+  }
 }
