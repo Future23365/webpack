@@ -8,7 +8,7 @@ const ESlintPlugin = require('eslint-webpack-plugin')
 // process.env.NODE_ENV = 'development';
 
 module.exports = {
-  entry: './src/js/index.js',
+  entry: ['./src/js/index.js', './src/index.html'], //将html文件添加之后可以解决开启HMRhtml不能热更新问题
   output: {
     path: resolve(__dirname, 'dist'),
     filename: 'js/built.js',
@@ -110,6 +110,9 @@ module.exports = {
     contentBase: resolve(__dirname, 'dist'),
     compress: true, //启动gzip压缩
     port: 3000,
-    open: true
-  }
+    open: true,
+    hot: true //开启HMR "开启后 **js文件默认不支持HMR功能**，*html文件不能热更新了*"(html不需要HMR)
+  },
+  target: "web", //不自动刷新添加这个
+  devtool: 'eval-source-map' // inline-source-map | hidden-source-map | eval-source-map | 等; 推荐使用 eval-source-map 加快速度
 }
