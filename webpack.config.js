@@ -1,63 +1,113 @@
-const { resolve } = require('path')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
+const { resolve } = require('path')
+const { CleanWebpackPlugin } = require('clean-webpack-plugin')
+const MiniCssExtractPlugin = require('mini-css-extract-plugin')
+const OptimizeCssAssetsWebpackPlugin = require('optimize-css-assets-webpack-plugin')
+const ESlintPlugin = require('eslint-webpack-plugin')
+//设置nodejs环境变量
+// process.env.NODE_ENV = 'development';
 
 module.exports = {
-  entry: './src/index.js',
+  entry: './src/js/index.js',
   output: {
-    filename: 'bunder.js',
-    path: resolve(__dirname, 'build'),
-    publicPath: './'
+    path: resolve(__dirname, 'dist'),
+    filename: 'js/built.js',
   },
+  mode: 'development',
   module: {
     rules: [
       {
-        test: /\.css$/,
-        use: [
-          'style-loader',
-          'css-loader',
-        ]
-      },
-      {
         test: /\.scss$/,
         use: [
-          'style-loader',
+          {
+            loader: MiniCssExtractPlugin.loader, //mini-loader，提取css为单独文件
+            options: {
+              publicPath: '../' //css文件路径
+            }
+          }, 
           'css-loader',
-          'sass-loader',
-        ]
+          {
+            loader: 'postcss-loader', //css兼容性loader
+            options: {
+              postcssOptions: {
+                plugins: [
+                  [
+                    "postcss-preset-env",
+                  ]
+                ]
+              }
+            }
+          },
+          'sass-loader'
+        ] 
+      },
+      {
+        test: /\.css$/,
+        use: ['style-loader', 'css-loader']
       },
       {
         test: /\.(jpg|png|gif)$/,
         loader: 'url-loader',
         options: {
           limit: 8 * 1024,
+          name: '[hash:10].[ext]',
           esModule: false,
-          name: '[hash:10].[ext]', //哈希前10位，[ext]:源文件后缀名
-        }
+          outputPath: 'images', //输入路径
+        },
+        type: 'javascript/auto'
       },
       {
-        test: /\.html$/,
-        loader: 'html-withimg-loader',  //处理img标签，负责引入图片
+        test: /\.html$/i,
+        loader: 'html-loader'
       },
       {
-        // exclude: /\.(css|js|html)$/, //排除资源
         test: /\.(eot|ttf|svg|woff|woff2)/,
         loader: 'file-loader',
         options: {
-          name: '[hash:10].[ext]'
+          name: '[hash:10].[ext]',
+        }
+      },
+      {
+        test: /\.js$/,
+        exclude: /node_modules/,
+        loader: 'babel-loader', //js兼容性loader
+        options: {
+          presets: [
+            [
+              '@babel/preset-env',
+              {
+                useBuiltIns: 'usage',
+                corejs: { //corejs
+                  version: 3
+                },
+                targets: {
+                  chrome: '60',
+                  firefox: '50',
+                  ie: '11',
+                  safari: '10'
+                }
+              }
+            ]
+          ]
         }
       }
     ]
   },
   plugins: [
+    new CleanWebpackPlugin(),
     new HtmlWebpackPlugin({
       template: './src/index.html'
-    })
+    }),
+    new MiniCssExtractPlugin({ //css单独文件插件
+      filename: 'css/built.css'
+    }),
+    new OptimizeCssAssetsWebpackPlugin(), //压缩css
+    new ESlintPlugin({
+      fix: true //自动修复eslint错误
+    }),
   ],
-  mode: 'development',
-  // target: "web",
   devServer: {
-    contentBase: resolve(__dirname, 'build'),
-    // contentBase: './dist',
+    contentBase: resolve(__dirname, 'dist'),
     compress: true, //启动gzip压缩
     port: 3000,
     open: true
